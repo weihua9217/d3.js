@@ -1,0 +1,61 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>force layout</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style></style>
+</head>
+<body>
+<script>
+    var w = 900;
+    var h = 600;
+    var padding = 60;
+    
+    svg();
+    
+//   畫布的屬性設定
+    function svg(){
+            d3.select("body").append("svg").attr({
+                width:w,
+                height:h});
+            
+            d3.select("svg").append("g").append("rect")
+                .attr({
+                width:"100%",
+                height:"100%",
+                fill:"white"});
+    }
+
+//  資料
+    var nodes = [];
+    for (var i=0; i<100; i++){
+         nodes.push({
+            idx:i,
+            r : parseInt(Math.random()*10+2)  
+        }); 
+    }
+       
+//  資料綁定    
+    var circles = d3.select("svg").selectAll("circle").data(nodes).enter().append("circle");
+    var color = d3.scale.linear().domain([2,12]).range(["#090","#f00"]);
+    
+    function tick() {
+    circles.attr({
+      cx: function(d) { return d.x; },  
+      cy: function(d) { return d.y; },  
+      r: function(d){return d.r;},
+      fill:function(d){return color(d.r);}
+      });}
+    
+    var force = d3.layout.force() 
+        .nodes(nodes)               
+        .size([800,600])            
+        .on("tick", tick)               
+        .start();                   
+        
+
+</script>
+
+</body>
+</html>

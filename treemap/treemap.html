@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>treemap</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+</head>
+<body>
+    <script>
+    var w = 900;
+    var h = 400;
+    var padding = 60;
+    var depth = 1;
+//    var newX = 0;
+//    var newY = 0;
+//    var newWidth = 0;
+//    var newHeight = 0;
+        
+    svg();
+    
+    // 畫布屬性    
+    function svg(){
+        
+        d3.select("body").append("svg")
+            .attr({
+            width:w,
+            height:h });
+        
+        d3.select("svg").append("g")
+            .append("rect")
+            .attr({
+                width: "100%",
+                height: "100%",
+                fill: "white" });};
+    
+    //讀取CSV
+    d3.csv("budget_data.csv",function(data){
+        //將資料巢狀化
+        var nested = {values: d3.nest()
+                      //第一個key即為第一個節點
+                      .key(function(d){return d.k;})
+                      .key(function(d){return d.s;})
+                      .key(function(d){return d.m;})
+                      //資料來源
+                      .entries (data)};
+        //treemap屬性
+        var treemap = d3.layout.treemap().size([900,400]);
+        //參考對象的修正
+        treemap.children(function(d){return d.values;});
+        treemap.value(function(d){return d.amount;});
+        
+        var nodes = treemap.nodes(nested);
+        
+        var color = d3.scale.category20();
+        
+        // 根據treemap layout 回傳的資料繪圖
+       
+       console.log(nodes); d3.select("svg").selectAll("rect").data(nodes)
+        .enter().append("rect").attr({
+        x: function(it) { return it.x; },
+        y: function(it) { return it.y; },
+        width: function(it) { return it.dx; },
+        height: function(it) { return it.dy; },
+        fill: function(it){return color(it.k)},
+        stroke: "black"});
+        
+        d3.selectAll("rect").on("click",function(data){
+            var newX = d3.select(this).attr("x");
+            var newY = d3.select(this).attr("y");
+            var newWidth = d3.select(this).attr("width");
+            var newHeight = d3.select(this).attr("height");
+            //為了製造點即放大的效果，需要利用比例尺
+            var xmap = d3.scale.linear()
+                    .domain([newX,newX+newWidth])
+                    .range([0,900]).clamp(true);
+            var ymap = d3.scale.linear()
+                    .domain([newY,newY+newHeight])
+                    .range([0,400]).clamp(true);
+            
+            console.log([newX,newY,newHeight,newWidth]);
+
+console.log([xmap(newX),ymap(newY),xmap(newX+ newWidth)-xmap(newX),ymap(newY+ newHeight)-ymap(newY)]);
+            
+            d3.select("svg").selectAll("rect").attr({
+            x: function(data){return xmap(newX);},
+            y: function(data){return ymap(newY);},
+            width: function(data) {return xmap(newX+ newWidth)-xmap(newX);},
+            height: function(data){return ymap(newY+ newHeight)-ymap(newY);},
+            });
+            
+            d3.select("svg").append("text").attr({
+                
+            })
+            
+        })        
+          
+    });
+        
+    
+    
+    
+    
+        
+    
+    
+
+    </script>
+    
+
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Untitled Document</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+        <style>
+        body{
+            background: #eee;
+        }
+        .axis path, .axis line{
+            fill:none;
+            stroke:black;
+            shape-rendering:auto;
+        }
+        .axis text{
+            font-size: 11px;
+            fill:black;}
+        #tooltip{
+          position: absolute;
+          left: 20px;
+          top:  100px; 
+          background: #fff;
+          width: 150px;
+          height: auto;
+          padding: 0px 10px;
+          border-radius: 5px;
+          box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+        }
+         #tooltip.hidden{
+          display: none;} 
+        
+    </style>
+</head>
+<body>
+  
+   <div id="tooltip" class="hidden">
+   <p><strong id="city">Hello</strong></p>
+   <p id="industry">tooltip</p>
+    </div>
+    <input type="button" value = "PLAY" id= "timer">
+    
+    <script>
+        
+        var w = 900;
+        var h = 600;
+        var padding = 60;
+        var letterList = ["A","B","C","D","E","F","G","H","I","J","K","M","N","O","P","Q","T","U","V","W","X","Z"];
+        
+        svg();       
+        
+        d3.csv("cancer_data.csv", mid, function(dataSet){
+           bind(dataSet);
+           render(dataSet);
+           btnList(dataSet);});
+        
+        function mid(d){
+            d.date = +d.date;
+            d.avg_age = +d.avg_age;
+            d.count = +d.count;
+            return d;}
+        
+        function svg(){
+           d3.select("body").append("svg").attr({
+               width:w,
+               height:h });
+            
+            d3.select("svg").append("g").append("rect").attr({
+                width: "100%",
+                height: "100%",
+                fill: "white" });
+            
+            d3.select("svg")
+                .append("g")
+                .classed("axis",true)
+                .attr("id","axisX");
+            
+            d3.select("svg")
+                .append("g")
+                .classed("axis",true)
+                .attr("id","axisY");}
+        
+
+        function bind(dataSet){
+            var selection = d3.select("svg")
+                            .selectAll("circle")
+                                .data(dataSet);
+            selection.enter().append("circle");
+            selection.exit().remove();}
+        
+        function render(dataSet){
+            var xScale = d3.scale.linear().domain(
+                [d3.min(dataSet,function(d){return d.crude_rate;}),
+                 d3.max(dataSet, function(d){return d.crude_rate;})]
+                    ).range([padding,w-padding]);
+            
+            var yScale = d3.scale.linear().domain(
+                [d3.min(dataSet, function(d){return d.avg_age;}),
+                 d3.max(dataSet, function(d){return d.avg_age;})]
+                    ).range([h-padding,padding]);
+            
+            var rScale = d3.scale.linear().domain(
+                [d3.min(dataSet, function(d){return d.count;}),
+                 d3.max(dataSet,function(d){return d.count;})]
+                    ).range([5,10]); 
+            
+            var fScale = d3.scale.category20();
+            
+            var xAxis = d3.svg.axis()
+                        .scale(xScale)
+                        .orient("bottom")
+                        .ticks(17);
+            
+            var yAxis = d3.svg.axis()
+                        .scale(yScale)
+                        .orient("left")
+                        .ticks(15);
+            
+            d3.selectAll("circle")
+                .transition()
+                .attr({
+                cx: function(d){
+                    return xScale(d.crude_rate);
+                  },
+                cy: function(d){
+                    return yScale(d.avg_age);
+                  },
+                r: function(d){
+                    return rScale(d.count);
+                  },
+                fill: function(d){
+                    return fScale(d.city);
+                  }
+                });
+            
+            d3.selectAll("circle").on ("mouseover",function(d){
+                var posX = d3.select(this).attr("cx");
+                var posY =d3.select(this).attr("cy");
+                var tooltip = d3.select("#tooltip").style({
+                            "left":(+posX+20) +"px",
+                            "top":(+posY+5) + "px"});
+                
+                tooltip.select("#city").text(d.city);
+                tooltip.select("#industry").text(d.category);
+                tooltip.classed("hidden",false);
+                })
+                
+                .on("mouseout",function(d){
+                d3.select("#tooltip").classed("hidden",true);
+                })
+                
+            d3.select("svg>#axisX")
+                .attr("transform","translate(0,"+(h-padding+20)+")")
+                .call(xAxis);
+            
+            d3.select("svg>#axisY")
+                .attr("transform","translate(28,"+(padding-10)+")")
+                .call(yAxis);
+            
+        }
+        
+        function unique(array){
+            var n = []
+            for(var i=0; i<array.length;i++){
+                if (n.indexOf(array[i])==-1){
+                    n.push(array[i]);}}
+            return n;}
+        
+        function btnList(dataSet){
+            
+            var catArr = dataSet.map(function(d){
+                    return d.category;});
+            
+            var ucatArr = unique(catArr);
+            
+            var fcatArr = ucatArr.filter(function(d){
+                return d != "";});
+            
+//          幫下拉式選單增加選項(和資料繫住)
+            
+            var selection = d3.select("body")
+                            .append("select")
+                            .selectAll("option")
+                            .data(fcatArr);
+            
+            selection.enter().append("option")
+                            .attr({"value":function(d){
+                            return d;}}).text(function(d){
+                            return d;});
+            
+            selection.exit().remove();
+            
+//          下拉式選單改變值 
+            
+            d3.select("select").on("change",function(){
+                var value =d3.select("select").property("value");
+                var newDataSet = dataSet.filter(function(d){
+                return d.category === value;});
+                update(newDataSet);});
+            
+            function update(newDataSet){
+                bind(newDataSet);
+                render(newDataSet);};
+            
+            d3.select('#timer').on("click",function(d){
+                var dateArr = unique(dataSet.map(function(d){
+                    return d.date;}));
+                var idx = 0;
+                
+            d3.select("svg").append("text").attr({
+                "id":"showYear",
+                "x":w-padding-250,
+                "y":h-padding,
+                "fill":"black",
+                "opacity":0.7,
+                "font-size":150
+            });
+                window.setInterval(function(d){
+                    var value = d3.select("select").property("value");
+                    var newDataSet = dataSet.filter(function(d){
+                       return d.category === value && 
+                                d.date === dateArr[idx]; });
+                    update(newDataSet);
+                    d3.select("#showYear").text(dateArr[idx]);
+                    idx++;
+                    if (idx>= dateArr.length){
+                     idx = 0;}
+                },1000);
+            })};
+                            
+                   
+    </script>
+
+</body>
+</html>

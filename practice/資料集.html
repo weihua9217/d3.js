@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Untitled Document</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script> 
+</head>
+<body>
+    <script>
+        d3.csv("invoice-taipei.csv",function(dataset){
+            console.table(dataset);
+            var body = d3.select("body");
+//            for (var i=0; i<dataset.length; i++){
+//           if(dataset[i].number>10000000){ body.append("div").text(dataset[i].industry+","+dataset[i].number);
+//            }
+//        }
+            
+        var fdataset = dataset.filter(function(d){
+                return d.number>10000 && d.date ==="2016/8/1"
+            && d.cid ==="A" ;                      
+                                      });
+        for(var i=0;i<fdataset.length; i++){
+            body.append("div").text(fdataset[i].industry+","+fdataset[i].number);
+            
+               }
+           });
+        
+    </script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>d3-start</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+    <style>
+        div{
+            font-size: 7px;
+        }
+    </style>
+</head>
+<body>
+  <svg width="900" height="500">
+      
+  </svg>
+   
+   <script>
+       d3.json("invoice.json", function(dataSet){
+           console.log(dataSet);
+           var svg = d3.select("svg");
+           var fDataSet = dataSet.filter(function(d){
+                return d.amount>1000000000 && d.date ==="2016/8/1"
+            && d.cid ==="A" ;
+           });
+           for(var i=0; i<fDataSet.length; i++){
+//            svg.append("text").attr({
+//                  "x":,
+//                  "y":,
+//              });
+            svg.append("rect").attr({
+                  "x":300,
+                  "y":0+20*i,
+         "width":fDataSet[i].amount/100000000,
+                  "height":16,
+                  "fill":"red"
+              });
+           }
+       });
+   </script>
+</body>
+</html>

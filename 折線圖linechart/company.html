@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>linechart</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+<style>
+    body{background:#eee;}
+    .axis path, .axis line{
+            fill:none;
+            stroke:black;
+            shape-rendering:auto;}
+    .axis text{
+            font-size: 11px;
+            fill:black;}
+    
+</style>    
+</head>
+<body>
+    
+    <script>
+        var w = 900;
+        var h = 600;
+        var padding = 60;
+        
+        //建立一個背景
+        svg();
+        
+        //建立資料庫
+        var MyData = [
+            {"company":"A","month":1,"sales":500},
+            {"company":"A","month":2,"sales":300},
+            {"company":"A","month":3,"sales":600},
+            {"company":"A","month":4,"sales":700},
+            {"company":"A","month":5,"sales":200},
+            {"company":"A","month":6,"sales":800},
+            {"company":"A","month":7,"sales":500},
+            {"company":"A","month":8,"sales":400},
+            {"company":"A","month":9,"sales":300},
+            {"company":"A","month":10,"sales":250},
+            {"company":"B","month":1,"sales":400},
+            {"company":"B","month":2,"sales":500},
+            {"company":"B","month":3,"sales":400},
+            {"company":"B","month":4,"sales":400},
+            {"company":"B","month":5,"sales":100},
+            {"company":"B","month":6,"sales":700},
+            {"company":"B","month":7,"sales":600},
+            {"company":"B","month":8,"sales":500},
+            {"company":"B","month":9,"sales":400},
+            {"company":"B","month":10,"sales":350},
+            {"company":"C","month":1,"sales":100},
+            {"company":"C","month":2,"sales":800},
+            {"company":"C","month":3,"sales":400},
+            {"company":"C","month":4,"sales":300},
+            {"company":"C","month":5,"sales":400},
+            {"company":"C","month":6,"sales":500},
+            {"company":"C","month":7,"sales":400},
+            {"company":"C","month":8,"sales":600},
+            {"company":"C","month":9,"sales":700},
+            {"company":"C","month":10,"sales":150}]
+        
+        render(MyData);
+        //畫布屬性
+        function svg(){
+            d3.select("body").append("svg").attr({
+                width:w,
+                height:h});
+            
+            d3.select("svg").append("g").append("rect")
+                .attr({
+                width:"100%",
+                height:"100%",
+                fill:"white"});
+            
+            d3.select("svg").append("g")
+                .classed("axis",true)
+                .attr("id","axisX");
+            
+            d3.select("svg").append("g")
+                .classed("axis",true)
+                .attr("id","axisY");}
+        
+        function render(DataSet){
+        //比例尺    
+        var xScale = d3.scale.linear().domain(
+            [d3.min(DataSet,function(d){return d.month;}),
+             d3.max(DataSet, function(d){return d.month;})]
+                ).range([padding,w-padding]);
+        var yScale = d3.scale.linear().domain(
+            [d3.min(DataSet, function(d){return d.sales;}),
+             d3.max(DataSet, function(d){return d.sales;})]
+                ).range([500,100]);    
+        var fScale = d3.scale.category20();
+        //唯一
+        function unique(array){
+            var n = [];
+            for(var i=0; i<array.length;i++){
+                if (n.indexOf(array[i])==-1){
+                    n.push(array[i]);}}
+            return n;}
+        var CompanyNameArr = DataSet.map(function(d){
+            return d.company;});
+        var uCompanyNameArr = unique(CompanyNameArr);     
+        //畫圖函數
+        var linef = d3.svg.line()
+            .x(function(d){return xScale(d.month);})
+            .y(function(d){return yScale(d.sales);});    
+            
+        function AddPath(DataSet){        
+            d3.select("svg").append("path")
+            .classed("line",true).data([DataSet])
+            .attr({
+            "d":linef,
+            "id":"Company "+ DataSet[0].company,
+            "stroke":function(d){
+                return fScale(d.company);},
+            "stroke-width":"2px",
+            "opacity":1,
+            "fill":"none"}) 
+            
+            
+        };
+            
+        //Addpath
+        for (var i=0; i<uCompanyNameArr.length;i++){
+            var MyNewData = DataSet.filter(function(d){
+              return d.company === uCompanyNameArr[i];  
+            });
+            AddPath(MyNewData);};
+        
+        d3.select("svg").selectAll("circle")
+            .data(DataSet).enter().append("circle").classed("circle",true)
+            .attr({
+            "id":function(d){return "Company:"+d.company+ " / Sales:"+d.sales;},
+            "cx":function(d){return xScale(d.month);},
+            "cy":function(d){return yScale(d.sales);},
+            "r":5,
+            "fill":"#6a6aed"});
+        
+            
+        //MouseOnLine
+        d3.selectAll("path")
+        .on("mouseover",function(d){
+            d3.selectAll(".line").attr({"opacity":0.4});
+            d3.selectAll(".circle").attr({"opacity":0.4});
+            d3.select(this).attr({
+                "opacity":0.7,
+                "stroke-width":"4px"});
+            //show information
+            d3.select("svg").append("text").attr({
+                "id":"ShowInf",
+                "x":50,
+                "y":50,
+                "fill":"black",
+                "opacity":0.7,
+                "font-family":"simsun",
+                "font-size":25}).text(String(this.id))})
+        .on("mouseout",function(d){
+            d3.selectAll(".line").attr({"opacity":1});
+            d3.selectAll(".circle").attr({"opacity":1});
+            d3.select(this).attr({"stroke-width":"2px"});
+            d3.select("svg>#ShowInf").remove();
+        });
+        
+        d3.selectAll("circle")
+        .on("mouseover",function(d){
+            d3.select("svg").append("text").attr({
+                "id":"ShowInf",
+                "x":50,
+                "y":50,
+                "fill":"black",
+                "font-family":"simsun",
+                "opacity":0.7,
+                "font-size":25}).text(String(this.id))})
+        .on("mouseout",function(d){
+            d3.selectAll(".line").attr({"opacity":1});
+            d3.selectAll(".circle").attr({"opacity":1});
+            d3.select(this).attr({"stroke-width":"2px"});
+            d3.select("svg>#ShowInf").remove();
+        });
+
+        //X,Y軸
+        var xAxis = d3.svg.axis()
+                        .scale(xScale)
+                        .orient("bottom")
+                        .ticks(10);
+            
+        var yAxis = d3.svg.axis()
+                        .scale(yScale)
+                        .orient("left")
+                        .ticks(15);
+        
+        d3.select("svg>#axisX")
+                .attr("transform","translate(0,"+(h-padding+20)+")")
+                .call(xAxis);
+            
+        d3.select("svg>#axisY")
+                .attr("transform","translate(28,0)")
+                .call(yAxis);        
+            
+        };
+                           
+    </script>
+
+
+</body>
+</html>

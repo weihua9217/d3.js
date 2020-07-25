@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>word cloud</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+</head>
+
+<body>
+    <script>
+        var w = 1800;
+        var h = 1200;
+        var padding = 60;
+
+        svg();
+
+        function svg() {
+            d3.select("body").append("svg")
+                .attr({
+                    width: w,
+                    height: h
+                });
+
+            d3.select("svg").append("g")
+                .append("rect").attr({
+                    width: "100%",
+                    height: "100%",
+                    fill: "white"
+                });
+        }
+
+        var myword = [{
+            text: "Hey",
+            size: 50,
+            x: 120,
+            y: 50
+        }, {
+            text: "Hello",
+            size: 80,
+            x: 100,
+            y: 20
+        }, {
+            text: "Hi",
+            size: 60,
+            x: -200,
+            y: -20
+        }, {
+            text: "Happy",
+            size: 80,
+            x: -150,
+            y: 10
+        }, {
+            text: "Hue",
+            size: 50,
+            x: 160,
+            y: -50
+        },{
+            text:"Hat",
+            size:40,
+            x:20,
+            y:-60
+        },{
+            text:"He",
+            size:50,
+            x:-80,
+            y:-60
+        },{
+            text:"H",
+            size:100,
+            x:0,
+            y:0
+        },{
+            text:"Hesitate",
+            size:80,
+            x:10,
+            y:20
+        },{
+            text:"Hint",
+            size:120,
+            x:-10,
+            y:50
+        },{
+            text:"High",
+            size:60,
+            x:-20,
+            y:-60
+        },{
+            text:"HTML",
+            size:100,
+            x:-10,
+            y:-70
+        },{
+            text:"Hangry",
+            size:90,
+            x:10,
+            y:-40
+        },
+            
+            
+                     
+                     
+                     
+                     ];
+
+        d3.layout.cloud().size([w-200, h-200]).words(myword)
+            .padding(20).rotate(function(d) {
+                return (Math.random() * 140);
+            }).fontSize(function(d) {
+                return d.size
+            }).on("end", draw).start();
+
+        function draw(words) {
+            var color = d3.scale.category20();
+            d3.select("svg").selectAll("text").data(words)
+                .enter().append("text").style("font-size", function(d) {
+                    return d.size + "px";
+                })
+                .attr("transform", function(d) {
+                    return "translate(" + (d.x + w / 2) + "," + (d.y + h / 2) + ")rotate(" + d.rotate + ")";
+                }).text(function(d) {
+                    return d.text;
+                }).attr("fill", function(d,i) {
+                    return color(i);
+                })
+        };
+
+    </script>
+
+
+</body>
+
+</html>

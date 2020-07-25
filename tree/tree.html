@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>tree</title>
+    <script src="https://d3js.org/d3.v3.js"></script>
+</head>
+<body>
+    <script>
+    const w = 900;
+    const h = 600;
+    
+    svg();
+    
+    function svg(){
+        d3.select("body").append("svg").attr({
+            width:w,
+            height:h
+        });
+        
+         d3.select("svg").append("g").append("rect")
+                .attr({
+                width:"100%",
+                height:"100%",
+                fill:"rgba(235, 153, 153, 0.49)"});  }    
+        
+    var MyData = [
+        {"Country":"A","City":"a","Company":"1","Name":"Matthew"},
+        {"Country":"A","City":"a","Company":"1","Name":"Ken"},
+        {"Country":"A","City":"b","Company":"2","Name":"Lara"},
+        {"Country":"A","City":"b","Company":"6","Name":"Sam"},
+        {"Country":"B","City":"c","Company":"4","Name":"Adam"},{"Country":"B","City":"d","Company":"3","Name":"Jennifer"},{"Country":"C","City":"e","Company":"5","Name":"Tom"},]
+    
+    var nMyData = d3.nest().key(function(d){
+        return d.Country;}).key(function(d){
+        return d.City;}).key(function(d){
+        return d.Company;}).entries(MyData)
+    
+    var root ={values: nMyData};
+    console.log(root);
+    
+    var tree_dataset = d3.layout.tree().size([w-100,h-100])
+        .children(function(d){
+            return d.values;});
+    var nodes =tree_dataset.nodes(root);
+    var links = tree_dataset.links(nodes);
+    
+    
+    
+    var selection_circle = d3.select("svg").selectAll("circle").data(nodes);
+    selection_circle.enter().append("circle").attr("class","circle")
+    .attr("transform","translate(10,10)");
+    
+    var selection_line =
+    d3.select("svg").selectAll(".link").data(links);
+    selection_line.enter().append("line").attr("class", "link")
+    .attr("transform","translate(10,10)");
+        
+    var selection_text =
+    d3.select("svg").selectAll("text").data(nodes);
+    selection_text.enter().append("text").attr("class","text")
+    .attr("transform","translate(30,15)");
+
+    var line = d3.selectAll(".link")
+    var text = d3.selectAll(".text")
+    
+    console.log(nMyData);
+    console.log(links);
+    console.log(line);
+    console.log(text);
+    
+    render(nMyData);
+        
+    function render(dataset){
+        
+        d3.selectAll("circle").attr({
+            cx:function(d){
+                return d.x},
+            cy:function(d){
+                return d.y;},
+            r:5,
+            fill:"#eb7926"});
+
+        d3.selectAll(".link")
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; })
+            .attr("stroke", "#e2866a")
+            .attr("stroke-width","2px")
+            .attr("fill","none");
+        
+        d3.selectAll(".text")
+            .attr({
+            "x":function(d){
+                if (d.depth < 4){
+                    return d.x;}
+                else {return d.x-10;}},
+            "y":function(d){
+                return d.y;},
+            "font-size":function(d){
+                if (d.depth < 4){
+                    return "25";}
+                else {return "15";}}
+            })
+            .text(function(d){
+                if (d.depth < 4){
+                    return d.key;}
+                else{return d.Name;}
+            });
+            
+    };
+        
+    </script>
+
+
+</body>
+</html>

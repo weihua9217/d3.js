@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Untitled Document</title>
+    <link rel="stylesheet" href="main.css">     
+    <script src="https://d3js.org/d3.v3.min.js"></script>      
+</head>
+<body>
+    <script>
+      var svg = d3.select("body")
+            .append("svg")
+        .attr(
+        {
+            "width":800,
+            "height":600,
+            "id":"barChart"
+        });
+    
+    var last_num =0;
+        
+    for (var i=0; i<20; i=i+1){
+        var num = random(20,300); 
+        svg.append("line")
+        .attr({
+            "x1":10+last_num,
+            "y1":10+12*(i-1)+5,
+            "x2":10+num,
+            "y2":10+12*i+5,
+            "stroke":"gray"}
+        );
+        
+        
+        svg.append("circle")
+        .attr({
+            "cx":10+num,
+            "cy":10+12*i+5,
+            "r":3,
+            "fill":"red"}
+        );
+         svg.append("text")
+        .attr({
+            "x":num+15,
+            "y":10+12*i+10,
+            "font-size":12
+            }
+        ).text(num);
+    last_num = num
+    }
+    svg.append("line")
+    .attr({
+        "x1":10+last_num,
+        "y1":10+12*(i-1)+5,
+        "x2":10+0,
+        "y2":10+12*i+5,
+        "stroke":"gray"}
+        );
+    function random(N,M){
+        return Math.ceil(Math.random()*(M-N)+N)
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Untitled Document</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script> 
+</head>
+<body>
+    <script>
+      var svg = d3.select("body")
+            .append("svg")
+        .attr(
+        {
+            "width":800,
+            "height":600,
+            "id":"barChart"
+        });
+        
+        for (var i=0; i<10; i=i+1){   
+            svg.append("rect")
+                .attr({
+                "x":10,
+                "y":10+12*i,
+                "width":20*(i+1),
+                "height":10,
+                "fill":"red"});
+        }
+        
+        
+    </script>
+</body>
+</html>
